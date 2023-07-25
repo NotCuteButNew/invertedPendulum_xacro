@@ -1,4 +1,5 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="inverted_pendulum">
+    <xacro:property name="PI" value="3.1415"/>
     <!-- base_link -->
     <xacro:property name="base_length" value="1"/>
     <xacro:property name="base_width" value="0.1"/>
@@ -23,4 +24,75 @@
         <child link="base"/>
         <origin xyz="0.0 0.0 ${base_height / 2}" rpy="0.0 0.0 0.0"/>
     </joint>
+
+    <!-- sliding block -->
+    <xacro:property name="block_length" value="${base_width}"/>
+    <xacro:property name="block_width" value="${base_width}"/>
+    <xacro:property name="block_height" value="${base_width}"/>
+
+    <link name="sliding_block">
+        <visual>
+            <origin xyz="0.0 0.0 ${block_height/2}" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="${block_length} ${block_width} ${block_height}"/>
+            </geometry>
+            <material name="red">
+                <color rgba="1.0 0.0 0.0 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="s_block2base" type="prismatic">
+        <origin xyz="${(base_length - block_length)/2} 0.0 ${base_height/2}" rpy="0.0 0.0 0.0"/>
+        <parent link="base"/>
+        <child link="sliding_block"/>
+        <axis xyz="-1 0.0 0.0"/>
+        <limit lower="0.0" upper="${base_length - block_length}" effort="2" velocity="0.5"/>
+    </joint>
+
+    <!-- rotating block -->
+    <xacro:property name="r_block_radius" value="0.005"/>
+    <xacro:property name="r_block_length" value="0.01"/>
+
+    <link name="rotating_block">
+        <visual>
+            <origin xyz="0 ${(r_block_length+block_width)/2} 0.0" rpy="${PI/2} 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${r_block_radius}" length="${r_block_length}"/>
+            </geometry>
+            <material name="white">
+                <color rgba="1.0 1.0 1.0 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="r_block2s_block" type="continuous">
+        <parent link="sliding_block"/>
+        <child link="rotating_block"/>
+        <origin xyz="0.0 0.0 ${block_height/2}" rpy="0.0 0.0 0.0"/>
+        <axis xyz="0.0 1 0.0"/>
+    </joint>
+
+    <!-- rod -->
+    <xacro:property name="rod_radius" value="0.0025"/>
+    <xacro:property name="rod_length" value="${(base_height+block_height)/2}"/>
+
+    <link name="rod">
+        <visual>
+            <origin xyz="0 ${base_width/2+rod_radius+r_block_length/2} ${-1*rod_length/2}" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${rod_radius}" length="${rod_length}"/>
+            </geometry>
+            <material name="green">
+                <color rgba="0.0 1.0 0.0 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="rod2r_block" type="fixed">
+        <parent link="rotating_block"/>
+        <child link="rod"/>
+        <origin xyz="0.0 0.0 0" rpy="0.0 0.0 0.0"/>
+    </joint>
+
 </robot>
