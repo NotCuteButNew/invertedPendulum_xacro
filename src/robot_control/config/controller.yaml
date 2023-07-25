@@ -1,0 +1,11 @@
+inverted_pendulum:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50  
+  
+  # Position Controllers ---------------------------------------
+  joint1_velocity_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: s_block2base
+    pid: {p: 100.0, i: 0.01, d: 10.0}
