@@ -13,22 +13,21 @@
 ros::Publisher pub;
 std_msgs::Float64 msg;
 PID_position pid_rad(Kp_rad, Ki_rad, Kd_rad);
-PID_position pid_pos(Kp_pos, Ki_pos, Kd_pos);
+PID_position pid_vel(Kp_vel, Ki_vel, Kd_vel);
 
 void doMsg(sensor_msgs::JointState::ConstPtr ptr) {
   float force_pos=0,force_rad=0;
   if (ptr->position[0] > min_rad && ptr->position[0] < max_rad)
     {
-      // force_pos=pid_pos.pid_control(0,ptr->position[1]);
-      force_pos=0;
-      force_rad=-1*pid_rad.pid_control(0, ptr->position[0]);
+      force_rad=pid_rad.pid_control(0, ptr->position[0]);
+      force_pos=pid_vel.pid_control(force_rad,ptr->velocity[0]);
+      msg.data=force_rad;
     }
   else {
     ROS_INFO("Out Of Range!!!");
-    force_pos=pid_pos.pid_control(0,ptr->position[1]);
-    force_rad=0;
+    force_pos=pid_vel.pid_control(0,ptr->position[1]);
+    msg.data=force_pos;
   }
-  msg.data=force_pos+force_rad;
   pub.publish(msg);
   ROS_INFO("force:%.2f", msg.data);
   return;
