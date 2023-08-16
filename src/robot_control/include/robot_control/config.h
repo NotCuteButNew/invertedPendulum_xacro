@@ -6,9 +6,9 @@
 #define Ki_rad 0.05
 #define Kd_rad 6
 
-#define Kp_pos 10
-#define Ki_pos 0
-#define Kd_pos 0
+#define Kp_vel 10
+#define Ki_vel 0
+#define Kd_vel 0
 
 
 #define pub_rate 50
