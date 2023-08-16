@@ -45,11 +45,11 @@
     <xacro:property name="block_length" value="${base_width}"/>
     <xacro:property name="block_width" value="${base_width}"/>
     <xacro:property name="block_height" value="${base_width}"/>
-    <xacro:property name="block_mass" value="0.4"/>
+    <xacro:property name="block_mass" value="0.5"/>
 
     <link name="sliding_block">
         <visual>
-            <origin xyz="0.0 0.0 ${block_height/2}" rpy="0.0 0.0 0.0"/>
+            <origin xyz="0.0 0.0 0" rpy="0.0 0.0 0.0"/>
             <geometry>
                 <box size="${block_length} ${block_width} ${block_height}"/>
             </geometry>
@@ -58,7 +58,7 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="0.0 0.0 ${block_height/2}" rpy="0.0 0.0 0.0"/>
+            <origin xyz="0.0 0.0 0" rpy="0.0 0.0 0.0"/>
             <geometry>
                 <box size="${block_length} ${block_width} ${block_height}"/>
             </geometry>
@@ -67,26 +67,30 @@
     </link>
 
     <gazebo reference="sliding_block">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
         <material>
             Gazebo/Red
         </material>
     </gazebo>
 
     <joint name="s_block2base" type="prismatic">
-        <origin xyz="${(base_length - block_length)/2} 0.0 ${base_height/2}" rpy="0.0 0.0 0.0"/>
+        <!-- <origin xyz="${(base_length - block_length)/2} 0.0 ${(base_height+block_height)/2}" rpy="0.0 0.0 0.0"/> -->
+        <origin xyz="0 0.0 ${(base_height+block_height)/2}" rpy="0.0 0.0 0.0"/>
         <parent link="base"/>
         <child link="sliding_block"/>
-        <axis xyz="-1 0.0 0.0"/>
-        <limit lower="0.0" upper="${base_length - block_length}" effort="2" velocity="0.5"/>
+        <axis xyz="1 0.0 0.0"/>
+        <limit lower="${-(base_length - block_length)/2}" upper="${(base_length - block_length)/2}" effort="1000" velocity="100"/>
+        <dynamics damping="0.7"/>
     </joint>
 
     <transmission name="tran1">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="s_block2base">
-            <hardwareInterface>VelocityJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         </joint>
         <actuator name="motor1">
-            <hardwareInterface>VelocityJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
     </transmission>
@@ -94,17 +98,18 @@
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
         <robotNamespace>/inverted_pendulum</robotNamespace>
+        <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
         </plugin>
     </gazebo>
 
     <!-- rotating block -->
     <xacro:property name="r_block_radius" value="0.005"/>
     <xacro:property name="r_block_length" value="0.01"/>
-    <xacro:property name="r_block_mass" value="0.05"/>
+    <xacro:property name="r_block_mass" value="0.001"/>
 
     <link name="rotating_block">
         <visual>
-            <origin xyz="0 ${(r_block_length+block_width)/2} 0.0" rpy="${PI/2} 0.0 0.0"/>
+            <origin xyz="0 0 0.0" rpy="${PI/2} 0.0 0.0"/>
             <geometry>
                 <cylinder radius="${r_block_radius}" length="${r_block_length}"/>
             </geometry>
@@ -113,7 +118,7 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="0 ${(r_block_length+block_width)/2} 0.0" rpy="${PI/2} 0.0 0.0"/>
+            <origin xyz="0 0 0.0" rpy="${PI/2} 0.0 0.0"/>
             <geometry>
                 <cylinder radius="${r_block_radius}" length="${r_block_length}"/>
             </geometry>
@@ -122,37 +127,27 @@
     </link>
 
     <gazebo reference="rotating_block">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
         <material>
             Gazebo/White
         </material>
     </gazebo>
 
-    <joint name="r_block2s_block" type="continuous">
+    <joint name="r_block2s_block" type="fixed">
         <parent link="sliding_block"/>
         <child link="rotating_block"/>
-        <origin xyz="0.0 0.0 ${block_height/2}" rpy="0.0 0.0 0.0"/>
-        <axis xyz="0.0 1 0.0"/>
+        <origin xyz="0.0 ${(block_width+r_block_length)/2} 0" rpy="0.0 0.0 0.0"/>
     </joint>
 
-    <transmission name="tran2">
-        <type>transmission_interface/SimpleTransmission</type>
-        <joint name="r_block2s_block">
-            <hardwareInterface>PositionJointInterface</hardwareInterface>
-        </joint>
-        <actuator name="motor2">
-            <hardwareInterface>PositionJointInterface</hardwareInterface>
-            <mechanicalReduction>1</mechanicalReduction>
-        </actuator>
-    </transmission>
-    
     <!-- rod -->
     <xacro:property name="rod_radius" value="0.0025"/>
     <xacro:property name="rod_length" value="${(base_height+block_height)/2}"/>
-    <xacro:property name="rod_mass" value="0.4"/>
+    <xacro:property name="rod_mass" value="0.2"/>
 
     <link name="rod">
         <visual>
-            <origin xyz="0 ${base_width/2+rod_radius+r_block_length/2} ${-1*rod_length/2}" rpy="0.0 0.0 0.0"/>
+            <origin xyz="0 0 ${rod_length/2}" rpy="0.0 0.0 0.0"/>
             <geometry>
                 <cylinder radius="${rod_radius}" length="${rod_length}"/>
             </geometry>
@@ -161,24 +156,48 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="0 ${base_width/2+rod_radius+r_block_length/2} ${-1*rod_length/2}" rpy="0.0 0.0 0.0"/>
+            <origin xyz="0 0 ${rod_length/2}" rpy="0.0 0.0 0.0"/>
             <geometry>
                 <cylinder radius="${rod_radius}" length="${rod_length}"/>
             </geometry>
         </collision>
-        <xacro:cylinder_inertial_matrix m="${rod_mass}" r="${rod_radius}" h="${rod_length}"/>
+        <!-- <xacro:cylinder_inertial_matrix m="${rod_mass}" r="${rod_radius}" h="${rod_length}"/> -->
+        <inertial>
+            <mass value="${rod_mass}" />
+            <inertia ixx="${rod_mass*(3*rod_radius*rod_radius+rod_length*rod_length)/12}" ixy = "0" ixz = "0"
+                iyy="${rod_mass*(3*rod_radius*rod_radius+rod_length*rod_length)/12}" iyz = "0"
+                izz="${rod_mass*rod_radius*rod_radius/2}" /> 
+            <origin xyz="0.0 0.0 ${rod_length/2}" rpy="0.0 0.0 0.0"/>
+        </inertial>
     </link>
 
     <gazebo reference="rod">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
         <material>
             Gazebo/Green
         </material>
+        <turnGravityOff>false</turnGravityOff>
     </gazebo>
 
-    <joint name="rod2r_block" type="fixed">
+    <joint name="rod2r_block" type="continuous">
         <parent link="rotating_block"/>
         <child link="rod"/>
-        <origin xyz="0.0 0.0 0" rpy="0.0 0.0 0.0"/>
+        <origin xyz="0.0 ${rod_radius+r_block_length/2} 0" rpy="0.0 0.0 0.0"/>
+        <axis xyz="0.0 1 0.0"/>
+        <dynamics  damping="0.005"/>
+        <!-- damping="0.02" -->
     </joint>
+
+    <transmission name="tran2">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="rod2r_block">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="motor2">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
 
 </robot>
