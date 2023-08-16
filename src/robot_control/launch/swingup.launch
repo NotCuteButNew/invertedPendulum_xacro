@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="robot_control" type="swing_up" name="swing_up" output="screen"/>
+</launch>
