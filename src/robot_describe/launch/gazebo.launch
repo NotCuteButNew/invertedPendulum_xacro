@@ -1,5 +1,7 @@
 <launch>
     <param name="robot_description" command="$(find xacro)/xacro $(find robot_describe)/urdf/xacro/robot.xacro"/>
-    <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="paused" value="true"/>
+    </include>
     <node pkg="gazebo_ros" type="spawn_model" name="model" args="-urdf -model inverted_pendulum -param robot_description"/>
 </launch>

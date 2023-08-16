@@ -6,12 +6,21 @@
   <!-- load the controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
 	output="screen" ns="/inverted_pendulum" args="joint_state_controller
-					  joint1_velocity_controller"/>
+					  joint1_effort_controller"/>
 
   <!-- convert joint states to TF transforms for rviz, etc -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
 	respawn="false" output="screen">
     <remap from="/joint_states" to="/inverted_pendulum/joint_states" />
+  </node>
+
+  <node name="balance" pkg="robot_control" type="basic_balancing" respawn="false" output="screen">
+  </node>
+
+  <arg name="position_topic" default="/inverted_pendulum/joint_states/position[0]" />
+  
+  <node name="rqt_plot_node" pkg="rqt_plot" type="rqt_plot" output="screen">
+    <param name="plot_names" value="$(arg position_topic)" />
   </node>
 
 </launch>
