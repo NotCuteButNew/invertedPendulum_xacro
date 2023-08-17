@@ -26,7 +26,6 @@ public:
   inline T Integral() override;
   inline T Derivative() override;
   T Calculate(const T target, const T actual) override;
-  void Show() override;
 };
 
 template <typename T>
