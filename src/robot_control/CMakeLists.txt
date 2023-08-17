@@ -122,6 +122,9 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_subdirectory(lib/PID)
+
+
 ## Declare a C++ library
 add_library(PID_
   SHARED
