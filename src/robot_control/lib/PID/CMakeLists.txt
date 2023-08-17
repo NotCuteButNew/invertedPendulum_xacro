@@ -9,5 +9,5 @@ include_directories(include)
 aux_source_directory(include INCLUDE_DIR)
 aux_source_directory(src SRC_DIR)
 
-add_library(${PROJECT_NAME} ${INCLUDE_DIR} ${SRC_DIR})
+add_library(${PROJECT_NAME} SHARED ${INCLUDE_DIR} ${SRC_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/PID)
