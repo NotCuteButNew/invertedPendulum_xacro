@@ -6,9 +6,13 @@
 #define KI_RAD 0
 #define KD_RAD -6.5*0.8
 
-#define KP_VEL 10
+#define KP_VEL -9.1
 #define KI_VEL 0
 #define KD_VEL 0
+
+#define KP_BLOCK_POS 0
+#define KI_BLOCK_POS 0
+#define KD_BLOCK_POS 0
 
 
 #define PUB_RATE 50
